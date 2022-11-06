@@ -1,5 +1,14 @@
 ﻿
 #include <iostream>
+#include <windows.h>
+#include <iomanip>
+
+long long int read_QPC()
+{
+    LARGE_INTEGER count;
+    QueryPerformanceCounter(&count);
+    return((long long int)count.QuadPart);
+}
 
 void sieveOfSundaram(int n) {
     
@@ -9,9 +18,9 @@ void sieveOfSundaram(int n) {
     for (int i = 0; i < k + 1; i++)
         numberArray[i] = true;
 
-    for (int i = 1; i < k + 1; i++) 
+    for (__int64 i = 1; i < k + 1; i++) 
     {
-        int j = i;
+        __int64 j = i;
         while (i + j + 2 * i * j <= k) 
         {
             //jeżeli mamy liczbę nieparzystą w postaci 2k+1 (uzyskujemy ją przy wypisywaniu wyniku) 
@@ -39,9 +48,18 @@ void sieveOfSundaram(int n) {
 
 int main()
 {
+    //dla pomiarów czasowych
+    long long int frequency, start, elapsed;
+    QueryPerformanceFrequency((LARGE_INTEGER*)&frequency);
+
     std::cout << "Podaj n:";
     int n;
     std::cin >> n;
     std::cout << "\n";
+
+    start = read_QPC();
     sieveOfSundaram(n);
+    elapsed = read_QPC() - start;
+    std::cout << "\nCzas [ms] = " << (1000.0 * elapsed) / frequency << "\n";
+
 }

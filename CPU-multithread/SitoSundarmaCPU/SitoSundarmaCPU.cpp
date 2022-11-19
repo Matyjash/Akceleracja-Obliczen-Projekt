@@ -1,5 +1,6 @@
 ﻿
 #include <iostream>
+#include <vector>
 #include<thread>
 #include <windows.h>
 #include <iomanip>
@@ -31,18 +32,21 @@ void sieveOfSundaram(int n) {
         }
     }
     //wypisujemy dwójkę jako najmniejszą liczbę pierwszą
+    /*
     if (n > 2)
     {
         std::cout << 2 << " ";
     }
+
     for (int i = 1; i < k + 1; i++)
     {
         if (numberArray[i])
         {
             //liczba w postaci 2k + 1
-           // std::cout << 2 * i + 1 << " ";
+           //std::cout << 2 * i + 1 << " ";
         }
     }
+     */
     delete[] numberArray;
     return;
 }
@@ -62,19 +66,21 @@ void sundaramThread(bool* numberArray, int startingIndex, int endingIndex, int k
             j++;
         }
     }
-    //wypisujemy dwójkę jako najmniejszą liczbę pierwszą
-    for (int i = startingIndex; i < endingIndex; i++)
+    /*
+
+    for (int i = 1; i < k + 1; i++)
     {
         if (numberArray[i])
         {
             //liczba w postaci 2k + 1
-           // std::cout << 2 * i + 1;
+           //std::cout << 2 * i + 1 << " ";
         }
-    }    
+    }
+     */
     return;
 }
 
-void sieveOfSundaramMultiThreaded(int n) {
+void sieveOfSundaramMultiThreaded(int n, int threadCount) {
 
     int k = (n - 2) / 2;
     bool* numberArray = new bool[k + 1];
@@ -85,18 +91,34 @@ void sieveOfSundaramMultiThreaded(int n) {
     for (int i = 0; i < k+1; i++)
         numberArray[i] = true;
 
+    std::vector<std::thread> threadPool;
 
-    std::thread t1(sundaramThread, numberArray, 1, divider1, k);
-    std::thread t2(sundaramThread, numberArray, divider1, divider2, k);
-    std::thread t3(sundaramThread, numberArray, divider2, divider3, k);
-    std::thread t4(sundaramThread, numberArray, divider3, k+1, k);
-    t1.join();
-    t2.join();
-    t3.join();
-    t4.join();
-    if (k > 2)
+    //wypisujemy dwójkę jako najmniejszą liczbę pierwszą
+    /*
+    if (n > 2)
     {
-        //std::cout << 2 << "\n";
+        std::cout << 2 << " ";
+    }
+    */
+    for (int i = 0; i < threadCount; i++) {
+        int divider = i * ceil(float(k) / threadCount);
+        int divider2 = i + 1 * ceil(float(k) / threadCount);
+        if (i == 0) {
+            std::thread t1(sundaramThread, numberArray, 1, divider1, k);
+            threadPool.push_back(std::move(t1));
+        }
+        else if(i==threadCount-1) {
+            std::thread t1(sundaramThread, numberArray, divider, k+1, k);
+            threadPool.push_back(std::move(t1));
+        }
+        else {
+            std::thread t1(sundaramThread, numberArray, divider, divider1, k);
+            threadPool.push_back(std::move(t1));
+        }
+
+    }
+    for (int i = 0; i < threadCount; i++) {
+        threadPool[i].join();
     }
     delete[] numberArray;
     return;
@@ -108,9 +130,14 @@ int main()
     long long int frequency, start, elapsed;
     QueryPerformanceFrequency((LARGE_INTEGER*)&frequency);
 
-    std::cout << "Podaj n:";
+    std::cout << "Podaj n: ";
     int n;
     std::cin >> n;
+    std::cout << "\n";
+
+    std::cout << "Podaj liczbe watkow: ";
+    int threads;
+    std::cin >> threads;
     std::cout << "\n";
 
     start = read_QPC();
@@ -120,7 +147,7 @@ int main()
 
 
     start = read_QPC();
-    sieveOfSundaramMultiThreaded(n);
+    sieveOfSundaramMultiThreaded(n, threads);
     elapsed = read_QPC() - start;
     std::cout << "\nCzas wiele watkow[ms] = " << (1000.0 * elapsed) / frequency << "\n";
 

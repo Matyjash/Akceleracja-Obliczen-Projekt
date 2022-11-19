@@ -84,9 +84,6 @@ void sieveOfSundaramMultiThreaded(int n, int threadCount) {
 
     int k = (n - 2) / 2;
     bool* numberArray = new bool[k + 1];
-    int divider1 = ceil(float(k) / 4);
-    int divider2 = 2 * ceil(float(k) / 4);
-    int divider3 = 3 * ceil(float(k) / 4);
     
     for (int i = 0; i < k+1; i++)
         numberArray[i] = true;
@@ -101,18 +98,18 @@ void sieveOfSundaramMultiThreaded(int n, int threadCount) {
     }
     */
     for (int i = 0; i < threadCount; i++) {
-        int divider = i * ceil(float(k) / threadCount);
-        int divider2 = i + 1 * ceil(float(k) / threadCount);
+        int lowerDivider = i * ceil(float(k) / threadCount);
+        int upperDivider = i + 1 * ceil(float(k) / threadCount);
         if (i == 0) {
-            std::thread t1(sundaramThread, numberArray, 1, divider1, k);
+            std::thread t1(sundaramThread, numberArray, 1, upperDivider, k);
             threadPool.push_back(std::move(t1));
         }
         else if(i==threadCount-1) {
-            std::thread t1(sundaramThread, numberArray, divider, k+1, k);
+            std::thread t1(sundaramThread, numberArray, lowerDivider, k+1, k);
             threadPool.push_back(std::move(t1));
         }
         else {
-            std::thread t1(sundaramThread, numberArray, divider, divider1, k);
+            std::thread t1(sundaramThread, numberArray, lowerDivider, upperDivider, k);
             threadPool.push_back(std::move(t1));
         }
 
